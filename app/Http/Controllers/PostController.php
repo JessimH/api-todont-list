@@ -49,12 +49,13 @@ class PostController extends Controller
 
     }
 
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $postToDelete = Post::where('id', $id)->get();
 
         if(count($postToDelete)>0){
-            if($postToDelete[0]->id === auth()->user()->id){
+            // dd($postToDelete[0]->id === $request->user()->id);
+            if($postToDelete[0]->user_id === $request->user()->id){
                 Post::where('id', $id )->delete();
                 return response()->json(['message'=>'OK'], 200);
             }

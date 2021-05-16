@@ -49,6 +49,30 @@ class PostController extends Controller
 
     }
 
+    public function update(Request $request, $id)
+    {
+        $post = Post::find($id);
+
+        if(!$post) {
+            return response()->json(["message" => "Not Found"], 404);
+        }
+
+        if($post->user->id != $request->user()->id) {
+            return response()->json(["message"=>"Accès à la tâche non autorisé"], 403);
+        }
+
+        $request->validate([
+            'body' => 'required',
+            'done' => 'required',
+        ]);
+        $post = Post::where('id', $id)->first();
+        $post->body = $request->body;
+        $post->done = $request->done;
+        $post->save();
+       
+        return response()->json(['message'=>'OK'], 200);
+    }
+
     public function destroy($id, Request $request)
     {
         $postToDelete = Post::where('id', $id)->get();

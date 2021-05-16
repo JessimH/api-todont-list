@@ -38,14 +38,14 @@ class PostController extends Controller
         $post = Post::find($id);
 
         if(!$post) {
-            return response()->json(["message" => "Not Found"]);
+            return response()->json(["message" => "Not Found"], 404);
         }
 
         if($post->user->id != $request->user()->id) {
-            return response()->json(["message"=>"Forbidden"], 403);
+            return response()->json(["message"=>"Accès à la tâche non autorisé"], 403);
         }
 
-        return response()->json($post);
+        return response()->json($post, 200);
 
     }
 

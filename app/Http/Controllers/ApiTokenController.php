@@ -37,7 +37,7 @@ class ApiTokenController extends Controller
         ]);
 
         //4 create auth token
-        $token = $user->createToken($request->device_name, ['posts:read'])->plainTextToken;
+        $token = $user->createToken($request->device_name, ['posts:read', 'posts:write'])->plainTextToken;
 
         //5 return data
         return response()->json([
@@ -61,9 +61,6 @@ class ApiTokenController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            // throw ValidationException::withMessages([
-            //     'email' => ['The provided credentials are incorrect.'],
-            // ]);
             return response()->json([
                 'error'=>"The provided credentials are incorrect."
             ], 401);
@@ -73,33 +70,45 @@ class ApiTokenController extends Controller
         $user->tokens()->where('tokenable_id', $user->id)->delete();
 
         //4 - create other token
-        $token = $user->createToken($request->device_name, ['posts:read'])->plainTextToken;
+        $token = $user->createToken($request->device_name, ['posts:read', 'posts:write'])->plainTextToken;
 
         return response()->json([
             'token'=> $token,
             'email'=>$user->email,
             'name'=> $user->name,
         ]);
-
-
     }
 
     public function me (Request $request)
     {
-        return response()->json([
-            'email'=>$request->user()->email,
-            'name'=> $request->user()->name,
-            "created_at"=> $request->user()->created_at
-        ]);
+        if($request->user()->currentAccessToken()){
+            return response()->json([
+                'email'=>$request->user()->email,
+                'name'=> $request->user()->name,
+                "created_at"=> $request->user()->created_at
+            ]);
+        }
+        else{
+            return response()->json([
+                'error'=>"Unauthenticated"
+            ], 401);
+        }
+        
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message'=>"You are disconnected"
-        ], 200);
+        if ($request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+            return response()->json([
+                'message'=>"You are disconnected"
+            ], 200);
+        }
+        else{
+            return response()->json([
+                'error'=>"Unauthenticated"
+            ], 401);
+        }
     }
 
 }

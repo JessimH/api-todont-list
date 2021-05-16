@@ -38,7 +38,7 @@ class PostController extends Controller
         $post = Post::find($id);
 
         if(!$post) {
-            return response()->json(["message" => "Not Found"], 404);
+            return response()->json(["message" => "La tâche n\'existe pa"], 404);
         }
 
         if($post->user->id != $request->user()->id) {
@@ -54,7 +54,7 @@ class PostController extends Controller
         $post = Post::find($id);
 
         if(!$post) {
-            return response()->json(["message" => "Not Found"], 404);
+            return response()->json(["message" => "La tâche n\'existe pa"], 404);
         }
 
         if($post->user->id != $request->user()->id) {
